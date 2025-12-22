@@ -135,7 +135,7 @@
 				onEachFeature: function (feature, layer) {
 				var stationid = feature.properties.reach_id;
 				layer.bindTooltip("River: " + feature.properties.river_name + ", SWOT Records: " + feature.properties.records);
-				var content = '<iframe id="ts_wa" width="700" height="420" src="altimeterheight_single.html?reach_id=" frameborder="0"></iframe>';
+				var content = '<iframe id="ts_wa" width="700" height="420" src="swot_station.html?reach_id=" frameborder="0"></iframe>';
 				var popupContent = content.replace("reach_id=", "reach_id=" + stationid);
 				layer.bindPopup(popupContent);
 				}
@@ -147,7 +147,7 @@
 				onEachFeature: function (feature, layer) {
 				layer.bindTooltip(feature.properties.river_name + " River");
 				var stationid = feature.properties.reach_id;
-				var content = '<iframe id="ts_wa" width="700" height="420" src="altimeterheight_single.html?reach_id=" frameborder="0"></iframe>';
+				var content = '<iframe id="ts_wa" width="700" height="420" src="swot_station.html?reach_id=" frameborder="0"></iframe>';
 				var popupContent = content.replace("reach_id=", "reach_id=" + stationid);
 				layer.bindPopup(popupContent);
 
@@ -181,7 +181,7 @@
 				var stationid = feature.properties.reach_id;
 				var bwdbstid = feature.properties.Station_ID;
 				layer.bindTooltip("Station: " + feature.properties.Station_ID);
-				var content = '<iframe id="ts_wa" width="700" height="420" src="altimeterheight.html?stationid=&bwdbid=" frameborder="0"></iframe>';
+				var content = '<iframe id="ts_wa" width="700" height="420" src="swot_comparison.html?stationid=&bwdbid=" frameborder="0"></iframe>';
 				var popupContent = content.replace("stationid=", "stationid=" + stationid).replace("bwdbid=", "bwdbid=" + bwdbstid);
 				layer.bindPopup(popupContent);
 			  }
