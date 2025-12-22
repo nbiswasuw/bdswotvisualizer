@@ -31,16 +31,33 @@
 
 
 <script type="text/javascript">
- var station = getParamValue("reach_id");
+ var swot_station = getParamValue("stationid");
+ var bwdb_stid = getParamValue("bwdbid");
 
-
-function retrievekmeans()
+function retrieveswot()
 {
 	dataset = '';
 	// AJAX in the data file
     $.ajax({
         type: "GET",
-        url: "data/swot_wse/" + station  + ".csv",
+        url: "data/swot_wse/" + swot_station  + ".csv",
+		async: false,
+        dataType: "text",
+        success: function(data)
+		{
+		  dataset=String(data);
+		}
+        });
+		return dataset;
+}
+
+function retrievebwdb()
+{
+	dataset = '';
+	// AJAX in the data file
+    $.ajax({
+        type: "GET",
+        url: "data/bwdb_measured_daily.csv",
 		async: false,
         dataType: "text",
         success: function(data)
@@ -54,14 +71,24 @@ function retrievekmeans()
 
 function load()
 {
-	var kmeansdata = [];
+	var rmsardata = [],
+	kmeansdata = [];
 
+	
+	gfsdata = retrieveswot();
+	lines = gfsdata.split('\n');
+	for (i = 1; i < lines.length; i++) {
+	var items = lines[i].split(',');
+		rmsardata.push([new Date(items[0]).getTime(), +items[2]]);
+	}
 
-	ecmwfdata = retrievekmeans();
+	ecmwfdata = retrievebwdb();
 	lines = ecmwfdata.split('\n');
 	for (i = 1; i < lines.length; i++) {
 	var items = lines[i].split(',');
-		kmeansdata.push([new Date(items[0]).getTime(), +items[2]]);
+		if (items[0] == bwdb_stid){
+		kmeansdata.push([new Date(items[1]).getTime(), +items[2]]);
+		}
 	}
         Highcharts.setOptions({
            global: {
@@ -75,7 +102,10 @@ function load()
 			panKey: 'shift'
 		},
 	title: {
-	  text: "SWOT Height"
+	  text: "SWOT \and BWDB WL Comparison"
+	},
+	subtitle: {
+	  text: "SWOT Reach ID: " + swot_station + ", BWDB Station ID: " + bwdb_stid
 	},
 	xAxis: {
 	  type: 'datetime'
@@ -97,14 +127,35 @@ function load()
 	},
 	legend: {},
 	series: [{
-	  name: 'SWOT-based',
+	  name: 'BWDB Measured River Height',
 	  data: kmeansdata,
 	  type: 'spline',
+	  marker: {
+		enabled: false,
+		radius: 3		
+	  },
 	  color:'blue',
 	  zIndex: 1,
-	  marker: {
-		enabled: true
+	  states: {
+		hover: {			
+		  lineWidthPlus: 0
+		}
 	  }
+	},{
+	  name: 'SWOT Satellite derived River Height',
+	  data: rmsardata,
+	  type: 'spline',
+		marker: {
+			enabled: true,
+			radius: 4
+		},
+	  color:'red',
+	  zIndex: 1,
+		states: {
+			hover: {
+				lineWidthPlus: 0
+			}
+		}
 	}]
 	});
 
