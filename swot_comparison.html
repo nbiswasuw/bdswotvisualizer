@@ -40,7 +40,7 @@ function retrieveswot()
 	// AJAX in the data file
     $.ajax({
         type: "GET",
-        url: "data/swot_wse/" + swot_station  + ".csv",
+        url: "data/flag_wse/" + swot_station  + "_flag.csv",
 		async: false,
         dataType: "text",
         success: function(data)
@@ -71,30 +71,47 @@ function retrievebwdb()
 
 function load()
 {
-	var rmsardata = [],
-	kmeansdata = [];
+	var allData = [];
+	var goodData = [];
+	var mediumData = [];
+	var badData = [];
+	var bwdbData = []
 
+	swotcsvdata = retrieveswot();
+	lines = swotcsvdata.split('\n');
 	
-	gfsdata = retrieveswot();
-	lines = gfsdata.split('\n');
 	for (i = 1; i < lines.length; i++) {
-	var items = lines[i].split(',');
-		rmsardata.push([new Date(items[0]).getTime(), +items[2]]);
+		var items = lines[i].split(',');
+		var t = new Date(items[0]).getTime();
+		var wse = +items[1];
+		var flag = +items[2];
+
+		allData.push([t, wse])
+		
+		if (flag === 0) {
+			goodData.push([t, wse]);
+		} else if (flag === 1) {
+			mediumData.push([t, wse]);
+		} else if (flag === 2) {
+			badData.push([t, wse]);
+		}
 	}
 
-	ecmwfdata = retrievebwdb();
-	lines = ecmwfdata.split('\n');
+	bwdbcsvdata = retrievebwdb();
+	lines = bwdbcsvdata.split('\n');
 	for (i = 1; i < lines.length; i++) {
 	var items = lines[i].split(',');
 		if (items[0] == bwdb_stid){
-		kmeansdata.push([new Date(items[1]).getTime(), +items[2]]);
+			bwdbData.push([new Date(items[1]).getTime(), +items[2]]);
 		}
 	}
-        Highcharts.setOptions({
-           global: {
-              useUTC: false
-           }
-        });
+
+	Highcharts.setOptions({
+		global: {
+			useUTC: false
+		}
+	});
+	
 	var chart = Highcharts.chart('container', {
 	chart: {
 			zoomType: 'x',
@@ -102,7 +119,7 @@ function load()
 			panKey: 'shift'
 		},
 	title: {
-	  text: "SWOT \and BWDB WL Comparison"
+	  text: "SWOT and BWDB WL Comparison"
 	},
 	subtitle: {
 	  text: "SWOT Reach ID: " + swot_station + ", BWDB Station ID: " + bwdb_stid
@@ -127,35 +144,52 @@ function load()
 	},
 	legend: {},
 	series: [{
-	  name: 'BWDB Measured River Height',
-	  data: kmeansdata,
+	  name: 'BWDB Measured WL',
+	  data: bwdbData,
 	  type: 'spline',
 	  marker: {
 		enabled: false,
 		radius: 3		
 	  },
-	  color:'blue',
+	  color:'red',
 	  zIndex: 1,
 	  states: {
 		hover: {			
 		  lineWidthPlus: 0
 		}
 	  }
-	},{
-	  name: 'SWOT Satellite derived River Height',
-	  data: rmsardata,
-	  type: 'spline',
-		marker: {
-			enabled: true,
-			radius: 4
-		},
-	  color:'red',
-	  zIndex: 1,
-		states: {
-			hover: {
-				lineWidthPlus: 0
-			}
-		}
+	},
+	{
+		name: 'SWOT-All',
+		data: allData,
+		type: 'spline',
+		color: 'black',   // dark blue
+		zIndex: 3,
+		marker: { enabled: false }
+	},
+	{
+		name: 'SWOT (Good)',
+		data: goodData,
+		type: 'scatter',
+		color: '#003f7f',   // dark blue
+		zIndex: 3,
+		marker: { enabled: true }
+	},
+	{
+		name: 'SWOT (Degraded)',
+		data: mediumData,
+		type: 'scatter',
+		color: '#4f83cc',   // medium blue
+		zIndex: 2,
+		marker: { enabled: true }
+	},
+	{
+		name: 'SWOT (Bad)',
+		data: badData,
+		type: 'scatter',
+		color: '#a6c8ff',   // light blue
+		zIndex: 1,
+		marker: { enabled: true }
 	}]
 	});
 

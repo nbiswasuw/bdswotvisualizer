@@ -34,13 +34,13 @@
  var station = getParamValue("reach_id");
 
 
-function retrievekmeans()
+function retrievecsv()
 {
 	dataset = '';
 	// AJAX in the data file
     $.ajax({
         type: "GET",
-        url: "data/flag_wse/" + station  + ".csv",
+        url: "data/flag_wse/" + station  + "_flag.csv",
 		async: false,
         dataType: "text",
         success: function(data)
@@ -54,21 +54,22 @@ function retrievekmeans()
 
 function load()
 {
+	var allData = [];
 	var goodData = [];
 	var mediumData = [];
 	var badData = [];
 
-	ecmwfdata = retrievekmeans();
-	lines = ecmwfdata.split('\n');
+	csvdata = retrievecsv();
+	lines = csvdata.split('\n');
 
 	for (i = 1; i < lines.length; i++) {
 		var items = lines[i].split(',');
-		if (items.length < 3) continue;
-
 		var t = new Date(items[0]).getTime();
 		var wse = +items[1];
 		var flag = +items[2];
 
+		allData.push([t, wse])
+		
 		if (flag === 0) {
 			goodData.push([t, wse]);
 		} else if (flag === 1) {
@@ -112,25 +113,33 @@ function load()
 	legend: {},
 	series: [
 	{
-		name: 'SWOT-Good',
-		data: goodData,
+		name: 'SWOT-All',
+		data: allData,
 		type: 'spline',
+		color: 'black',   // dark blue
+		zIndex: 3,
+		marker: { enabled: false }
+	},
+	{
+		name: 'SWOT (Good)',
+		data: goodData,
+		type: 'scatter',
 		color: '#003f7f',   // dark blue
 		zIndex: 3,
 		marker: { enabled: true }
 	},
 	{
-		name: 'SWOT-Medium',
+		name: 'SWOT (Degraded)',
 		data: mediumData,
-		type: 'spline',
+		type: 'scatter',
 		color: '#4f83cc',   // medium blue
 		zIndex: 2,
 		marker: { enabled: true }
 	},
 	{
-		name: 'SWOT-Bad',
+		name: 'SWOT (Bad)',
 		data: badData,
-		type: 'spline',
+		type: 'scatter',
 		color: '#a6c8ff',   // light blue
 		zIndex: 1,
 		marker: { enabled: true }
