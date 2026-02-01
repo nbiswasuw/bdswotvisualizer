@@ -40,7 +40,7 @@ function retrievekmeans()
 	// AJAX in the data file
     $.ajax({
         type: "GET",
-        url: "data/swot_wse/" + station  + ".csv",
+        url: "data/flag_wse/" + station  + ".csv",
 		async: false,
         dataType: "text",
         success: function(data)
@@ -54,20 +54,34 @@ function retrievekmeans()
 
 function load()
 {
-	var kmeansdata = [];
-
+	var goodData = [];
+	var mediumData = [];
+	var badData = [];
 
 	ecmwfdata = retrievekmeans();
 	lines = ecmwfdata.split('\n');
+
 	for (i = 1; i < lines.length; i++) {
-	var items = lines[i].split(',');
-		kmeansdata.push([new Date(items[0]).getTime(), +items[2]]);
+		var items = lines[i].split(',');
+		if (items.length < 3) continue;
+
+		var t = new Date(items[0]).getTime();
+		var wse = +items[1];
+		var flag = +items[2];
+
+		if (flag === 0) {
+			goodData.push([t, wse]);
+		} else if (flag === 1) {
+			mediumData.push([t, wse]);
+		} else if (flag === 2) {
+			badData.push([t, wse]);
+		}
 	}
-        Highcharts.setOptions({
-           global: {
-              useUTC: false
-           }
-        });
+	Highcharts.setOptions({
+		global: {
+			useUTC: false
+		}
+	});
 	var chart = Highcharts.chart('container', {
 	chart: {
 			zoomType: 'x',
@@ -96,16 +110,32 @@ function load()
 	  valueSuffix: " m"
 	},
 	legend: {},
-	series: [{
-	  name: 'SWOT-based',
-	  data: kmeansdata,
-	  type: 'spline',
-	  color:'blue',
-	  zIndex: 1,
-	  marker: {
-		enabled: true
-	  }
-	}]
+	series: [
+	{
+		name: 'SWOT-Good',
+		data: goodData,
+		type: 'spline',
+		color: '#003f7f',   // dark blue
+		zIndex: 3,
+		marker: { enabled: true }
+	},
+	{
+		name: 'SWOT-Medium',
+		data: mediumData,
+		type: 'spline',
+		color: '#4f83cc',   // medium blue
+		zIndex: 2,
+		marker: { enabled: true }
+	},
+	{
+		name: 'SWOT-Bad',
+		data: badData,
+		type: 'spline',
+		color: '#a6c8ff',   // light blue
+		zIndex: 1,
+		marker: { enabled: true }
+	}
+	]
 	});
 
 }
