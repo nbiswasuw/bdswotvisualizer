@@ -57,7 +57,7 @@ function retrievebwdb()
 	// AJAX in the data file
     $.ajax({
         type: "GET",
-        url: "data/bwdb_measured_daily.csv",
+        url: "data/bwdb_measured_daily_updated.csv",
 		async: false,
         dataType: "text",
         success: function(data)
@@ -173,7 +173,9 @@ function load()
 		type: 'scatter',
 		color: '#003f7f',   // dark blue
 		zIndex: 3,
-		marker: { enabled: true }
+		marker: { enabled: true,
+ 		    symbol: 'circle'
+		}
 	},
 	{
 		name: 'SWOT (Degraded)',
@@ -181,7 +183,9 @@ function load()
 		type: 'scatter',
 		color: '#4f83cc',   // medium blue
 		zIndex: 2,
-		marker: { enabled: true }
+		marker: { enabled: true,
+ 		    symbol: 'triangle'
+ 		}
 	},
 	{
 		name: 'SWOT (Bad)',
@@ -189,7 +193,10 @@ function load()
 		type: 'scatter',
 		color: '#a6c8ff',   // light blue
 		zIndex: 1,
-		marker: { enabled: true }
+		marker: {
+			enabled: true,
+ 		    symbol: 'triangle-down'
+		}
 	}]
 	});
 
